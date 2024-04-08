@@ -27,7 +27,7 @@ def configure_routes(app):
         text = request.args.get('text')
         language = request.args.get('language', 'en')
 
-        output_path = predict_tts(text, language, "") 
+        output_path = predict_tts(text, language, "../models/winter.wav") 
         if output_path:
             return send_from_directory(directory=os.path.dirname(output_path), filename=os.path.basename(output_path), as_attachment=True)
         else:
