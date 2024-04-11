@@ -21,8 +21,7 @@ def initialize_model():
     model_path = os.path.join(get_user_data_dir("tts"), model_name.replace("/", "--"))
     
     # 모델 설정 로드
-    config_path = os.path.join(model_path, "config.json")
-    config = load_config(config_path)
+    config = XttsConfig()
     
     # 모델 인스턴스화 및 체크포인트 로드
     model = Xtts(config)

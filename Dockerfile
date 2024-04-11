@@ -1,19 +1,26 @@
-# Python 이미지를 기반으로 설정합니다.
-FROM python:3.6
+# Use an official NVIDIA base image with CUDA support, assuming we are to use an Ubuntu base here for simplicity
+FROM python:3.10.14
 
-# 작업 디렉토리를 설정합니다.
+# Set label for the docker image description
+LABEL description="Docker image for TTS"
+
+# Set the working directory
 WORKDIR /app
 
-# git을 설치합니다.
-RUN apt-get update && apt-get install -y git
+# Copy the current directory contents into the container at /app
+COPY . /app/
 
-RUN pip install gunicorn
+# Install dependencies
+# Combining RUN commands and cleanup to reduce layer size
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y \
+    git \
 
-# GitHub 저장소에서 프로젝트를 클론합니다.
-RUN git clone https://github.com/jwoo9928/TTS-Server.git /app
+RUN pip install --upgrade pip flask gunicorn tts
 
-# 의존성을 설치합니다.
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies
+# RUN pip3 install --no-cache-dir -r requirements.txt
 
-# 서버를 실행합니다. 이 명령어는 해당 프로젝트와 환경에 맞게 조정해야 할 수 있습니다.
-CMD ["gunicorn", "-w", "2", "--worker-class", "gthread", "--threads", "2", "-b", "0.0.0.0:8020", "app.wsgi:app"]
+# Define the default command to run the server
+# Adjust the number of workers and threads as per your project's need and environment capability.
+#CMD ["gunicorn", "-w", "4", "--worker-class", "gthread", "--threads", "4", "-b", "0.0.0.0:8020", "app.wsgi:app"]

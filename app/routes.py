@@ -1,5 +1,5 @@
 from flask import request, send_from_directory, send_file, current_app as app
-from xtts_api import initialize_model, gen_tts, predict_tts  # Updated imports
+from .xtts_api import initialize_model, gen_tts, predict_tts
 import os
 
 def configure_routes(app):
