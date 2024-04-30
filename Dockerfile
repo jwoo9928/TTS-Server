@@ -14,9 +14,11 @@ COPY . /app/
 # Combining RUN commands and cleanup to reduce layer size
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-    git \
+    git
 
-RUN pip install --upgrade pip flask gunicorn tts
+RUN pip install --upgrade pip 
+
+RUN pip install flask gunicorn tts
 
 # Install Python dependencies
 # RUN pip3 install --no-cache-dir -r requirements.txt
