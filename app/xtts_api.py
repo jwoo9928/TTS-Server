@@ -6,46 +6,53 @@ from TTS.tts.configs.xtts_config import XttsConfig
 from TTS.tts.models.xtts import Xtts
 from TTS.utils.manage import ModelManager
 from TTS.utils.generic_utils import get_user_data_dir
-#from TTS.utils.x import load_config
+import threading
 import langid
 import re
 import time
+import torchaudio
 
-executor = ThreadPoolExecutor(max_workers=4)
+class AppContext:
+    _instance = None
+    _lock = threading.Lock()
 
+    @classmethod
+    def get_instance(cls):
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = cls()
+        return cls._instance
 
-# 모델 및 설정 초기화 및 로딩을 위한 함수
-def initialize_model(app):
-    # Model download path
-    # model_name = "tts_models/multilingual/multi-dataset/xtts_v2"
-    # ModelManager().download_model(model_name)
-    # model_path = os.path.join(get_user_data_dir("tts"), model_name.replace("/", "--"))
-    model_path = "./XTTS-v2"
+    def __init__(self):
+        if not hasattr(self, 'model_initialized'):
+            self.model = None
+            self.config = {}
+            self.model_initialized = False
 
-    # Model configuration loading
-    config = XttsConfig()
-    config.load_json(os.path.join(model_path, "config.json"))
+    def initialize_model(self):
+        if not self.model_initialized:
+            model_path = "./XTTS-v2"
+            config = XttsConfig()
+            config.load_json(os.path.join(model_path, "config.json"))
+            self.model = Xtts.init_from_config(config)
+            self.model.load_checkpoint(
+                config,
+                speaker_file_path=os.path.join(model_path, "speakers_xtts.pth"),
+                checkpoint_path=os.path.join(model_path, "model.pth"),
+                vocab_path=os.path.join(model_path, "vocab.json"),
+                eval=True
+            )
+            self.model.eval()
+            self.config = config
+            self.model_initialized = True
+            print("model is initialized")
+    def predict_tts(self, text, language, audio_file_pth):
+        return predict(text, language, audio_file_pth)
 
-    # Model instantiation and checkpoint loading
-    model = Xtts.init_from_config(config)
-    model.load_checkpoint(
-        config,
-        speaker_file_path=os.path.join(model_path, "speakers_xtts.pth"),
-        checkpoint_path=os.path.join(model_path, "model.pth"),
-        vocab_path=os.path.join(model_path, "vocab.json"),
-        eval=True,
-        # use_deepspeed=True,
-    )
-    model.eval()
-
-    # Store model and config in app context
-    app.config['xtts_model'] = model
-    app.config['xtts_config'] = config
-
-# 텍스트를 음성으로 변환하는 함수
 def predict(text, language, audio_file_pth):
-    model = app.config['xtts_model']
-    config = app.config['xtts_config']
+    model = AppContext.get_instance().model
+    config = AppContext.get_instance().config
 
     language_predicted = langid.classify(text)[0].strip()
     speaker_wav = audio_file_pth
@@ -102,12 +109,3 @@ def predict(text, language, audio_file_pth):
     except Exception as e:
         print(f"Error during conditioning latent extraction: {e}")
         return e
-
-
-def gen_tts(text, language="en"):
-    future = executor.submit(text_to_speech, text, language)
-    return future.result()
-
-def predict_tts(text, language, audio_file_path):
-    future = executor.submit(predict, text, language, audio_file_path)
-    return future.result()

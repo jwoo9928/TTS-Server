@@ -1,3 +1,4 @@
 flask
-tts==0.22.0
+tts==0.23.0
 langid
+torchaudio
