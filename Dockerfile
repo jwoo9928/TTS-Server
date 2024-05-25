@@ -14,15 +14,15 @@ COPY . /app/
 # Combining RUN commands and cleanup to reduce layer size
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-    git
+    git ffmpeg
 
 RUN pip install --upgrade pip 
 
 RUN pip install flask gunicorn tts
 
 # Install Python dependencies
-# RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Define the default command to run the server
 # Adjust the number of workers and threads as per your project's need and environment capability.
-#CMD ["gunicorn", "-w", "4", "--worker-class", "gthread", "--threads", "4", "-b", "0.0.0.0:8020", "app.wsgi:app"]
+CMD ["gunicorn", "-w", "2", "--worker-class", "gthread", "--threads", "2", "-b", "0.0.0.0:8010", "app.wsgi:app"]
