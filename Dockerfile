@@ -14,8 +14,21 @@ COPY . /app/
 # Combining RUN commands and cleanup to reduce layer size
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-    git ffmpeg
+    git ffmpeg \
+    curl
 
+# Install pm2
+RUN npm install pm2@latest -g
+
+# Install git lfs
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+    apt-get install git-lfs && \
+    git lfs install
+
+# Clone the required repository
+RUN git clone https://huggingface.co/coqui/XTTS-v2 /app/XTTS-v2
+
+# Upgrade pip and install Python dependencies
 RUN pip install --upgrade pip 
 
 RUN pip install flask gunicorn tts
@@ -23,6 +36,6 @@ RUN pip install flask gunicorn tts
 # Install Python dependencies
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Define the default command to run the server
-# Adjust the number of workers and threads as per your project's need and environment capability.
-CMD ["gunicorn", "-w", "2", "--worker-class", "gthread", "--threads", "2", "-b", "0.0.0.0:8010", "app.wsgi:app"]
+
+# Run the application
+CMD ["pm2-runtime", "app.py"]
