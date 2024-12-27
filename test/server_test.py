@@ -3,7 +3,7 @@ import numpy as np
 from scipy.io.wavfile import write
 import wave
 
-STREAM_URL = "http://localhost:8010/tts/tts_stream_chunk?text=hi%20my%20name%20is%20posilping"
+STREAM_URL = "http://211.216.233.107:93/tts/tts_stream_chunk_static?text=hi%20my%20name%20is%20posilping"
 
 def receive_and_save_audio(url, output_file):
     try:

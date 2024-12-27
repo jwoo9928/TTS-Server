@@ -36,6 +36,16 @@ RUN pip install flask gunicorn tts
 # Install Python dependencies
 RUN pip3 install --no-cache-dir -r requirements.txt
 
+# apt install cuda-11-8
+export PATH=/usr/local/cuda-11.8/bin:$PATH
+export LD_LIBRARY_PATH=/usr/local/cuda-11.8/lib64:$LD_LIBRARY_PATH
+source ~/.bashrc
+pip install deepspeed
+apt install git
+https://github.com/jwoo9928/TTS-Server.git
 
+git ainstall git-lfs
+pip uninstall torch torchvision torchaudio
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 # Run the application
 CMD ["pm2-runtime", "app.py"]
