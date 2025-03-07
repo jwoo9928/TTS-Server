@@ -1,121 +1,172 @@
 # TTS-Server 🎙️
 
-<div align="center">
+Flask Python XTTS Streaming Docker
 
-![TTS Server Banner](https://raw.githubusercontent.com/username/TTS-Server/main/assets/banner.png)
+A high-performance Text-to-Speech API server that provides real-time streaming capabilities with multiple voice model support and thread-safe operations.
 
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Flask-2.0%2B-green)](https://flask.palletsprojects.com/)
-[![Docker](https://img.shields.io/badge/Docker-Supported-blue)](https://www.docker.com/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[Features](#features) • [Installation](#installation) • [Usage](#usage) • [API Documentation](#api-documentation) • [Contributing](#contributing)
 
-_A high-performance Text-to-Speech API server with streaming capabilities and multiple voice models support_
+## 🎯 Project Role & Purpose
 
-[Features](#features) • [Quick Start](#quick-start) • [API Documentation](#api-documentation) • [Docker](#docker-deployment) • [Contributing](#contributing)
+This TTS-Server acts as a crucial infrastructure component for voice-enabled applications, playing several key roles:
 
-</div>
+| Role                       | Description                                                                                     |
+| -------------------------- | ----------------------------------------------------------------------------------------------- |
+| 🔊 Voice Generation Engine | Powers applications requiring high-quality text-to-speech conversion with multiple voice models |
+| 🌊 Streaming Service       | Provides real-time audio streaming capabilities for immediate voice feedback                    |
+| 🎭 Voice Model Hub         | Manages and serves multiple voice models for different use cases and languages                  |
+| 🔒 Resource Manager        | Ensures thread-safe operations and optimal resource utilization                                 |
+| 🌐 Multi-Language Support  | Handles text-to-speech conversion across multiple languages                                     |
+
+### Key Benefits
+
+**For Application Developers:**
+
+- Ready-to-use TTS API endpoints
+- Real-time streaming capabilities
+- Multiple voice model support
+- Thread-safe operations
+
+**For Service Providers:**
+
+- High-performance architecture
+- Scalable deployment options
+- Resource optimization
+- Comprehensive monitoring
+
+**For End Users:**
+
+- High-quality voice output
+- Real-time voice generation
+- Multiple language support
+- Customizable voice options
 
 ## 🌟 Features
 
-- 🚀 High-performance TTS conversion
-- 🔄 Real-time streaming support
-- 🌐 Multiple language support
-- 🎭 Multiple voice model support
-- 🔧 Configurable chunk sizes for streaming
-- 📚 Swagger documentation
-- 🐳 Docker support
-- 🔒 Thread-safe model instance management
+| Feature              | Description                                  |
+| -------------------- | -------------------------------------------- |
+| 🚀 High Performance  | Optimized for fast text-to-speech conversion |
+| 🌊 Streaming Support | Real-time audio streaming capabilities       |
+| 🎭 Multiple Models   | Support for various voice models             |
+| 🌍 Multi-Language    | Handles multiple languages                   |
+| 🔄 Chunk Processing  | Configurable chunk sizes for streaming       |
+| 📚 API Documentation | Comprehensive Swagger documentation          |
+| 🐳 Containerization  | Full Docker support                          |
+| 🔒 Thread Safety     | Secure multi-threaded operations             |
 
-## 🚀 Quick Start
+## 🚀 Installation
 
 ### Prerequisites
 
 - Python 3.8 or higher
 - pip package manager
-- (Optional) Docker
+- Docker (optional)
 
-### Installation
-
-1. Clone the repository:
+### Quick Start
 
 ```bash
+# Clone the repository
 git clone https://github.com/username/TTS-Server.git
 cd TTS-Server
-```
 
-2. Install dependencies:
-
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-3. Place your voice models in the `models` directory:
+# Set up voice models
+mkdir -p models
+# Place your voice models in the models directory
 
-```bash
-models/
-  ├── winter.wav
-  └── other_models.wav
-```
-
-4. Start the server:
-
-```bash
+# Start the server
 gunicorn -w 2 --worker-class gthread --threads 2 -b 0.0.0.0:8010 wsgi:app
+```
+
+### Docker Setup
+
+```bash
+# Build the Docker image
+docker build -t tts-server .
+
+# Run the container
+docker run -p 8010:8010 tts-server
+```
+
+## 💻 Usage
+
+### Environment Variables
+
+| Variable | Description                | Required |
+| -------- | -------------------------- | -------- |
+| PORT     | Server port number         | Yes      |
+| WORKERS  | Number of Gunicorn workers | Yes      |
+| THREADS  | Threads per worker         | Yes      |
+
+### 🔌 API Endpoints
+
+**Text-to-Speech Service**
+
+| Endpoint                       | Method | Description                 | Parameters                                |
+| ------------------------------ | ------ | --------------------------- | ----------------------------------------- |
+| `/tts/tts_file`                | GET    | Convert text to speech file | `id`, `text`, `language`, `model`         |
+| `/tts/tts_stream`              | GET    | Stream audio in real-time   | `text`, `language`, `model`               |
+| `/tts/tts_stream_chunk_static` | GET    | Stream with static chunks   | `text`, `language`, `model`               |
+| `/tts/tts_stream_chunk`        | GET    | Stream with custom chunks   | `text`, `language`, `model`, `chunk_size` |
+
+### 📝 Example Usage
+
+```python
+# Using requests to get TTS file
+import requests
+
+response = requests.get(
+    "http://localhost:8010/tts/tts_file",
+    params={
+        "id": "user123",
+        "text": "Hello World",
+        "language": "en",
+        "model": "winter"
+    }
+)
+
+# Save the audio file
+with open("output.wav", "wb") as f:
+    f.write(response.content)
+```
+
+## 🏗️ Project Structure
+
+```
+TTS-Server/
+├── app/
+│   ├── __init__.py    # Application initialization
+│   ├── routes.py      # API routes
+│   └── xtts_api.py    # TTS core functionality
+├── models/            # Voice models
+├── test/             # Test files
+├── Dockerfile        # Docker configuration
+├── requirements.txt  # Python dependencies
+└── wsgi.py          # WSGI entry point
+```
+
+## 🛠️ Development
+
+```bash
+# Development mode
+python wsgi.py
+
+# Run tests
+python -m pytest
+
+# Build Docker image
+docker build -t tts-server .
 ```
 
 ## 📚 API Documentation
 
-Access the Swagger documentation at `/docs` endpoint after starting the server.
+Once the application is running, visit:
 
-### Available Endpoints
-
-| Endpoint                       | Method | Description                                  | Parameters                                |
-| ------------------------------ | ------ | -------------------------------------------- | ----------------------------------------- |
-| `/tts/tts_file`                | GET    | Convert text to speech and return audio file | `id`, `text`, `language`, `model`         |
-| `/tts/tts_stream`              | GET    | Stream audio in real-time                    | `text`, `language`, `model`               |
-| `/tts/tts_stream_chunk_static` | GET    | Stream audio with static chunks              | `text`, `language`, `model`               |
-| `/tts/tts_stream_chunk`        | GET    | Stream audio with configurable chunks        | `text`, `language`, `model`, `chunk_size` |
-
-### Example Request
-
-```bash
-curl -X GET "http://localhost:8010/tts/tts_file?id=user123&text=Hello%20World&language=en&model=winter"
-```
-
-## 🐳 Docker Deployment
-
-1. Build the Docker image:
-
-```bash
-docker build -t tts-server .
-```
-
-2. Run the container:
-
-```bash
-docker run -p 8010:8010 tts-server
-```
-
-## 🔧 Configuration
-
-The server can be configured through environment variables:
-
-| Variable  | Description                | Default |
-| --------- | -------------------------- | ------- |
-| `PORT`    | Server port                | 8010    |
-| `WORKERS` | Number of Gunicorn workers | 2       |
-| `THREADS` | Threads per worker         | 2       |
-
-## 🎯 Performance Optimization
-
-- Singleton pattern for model instances
-- Thread-safe operations
-- Optimized memory usage
-- Efficient streaming with configurable chunk sizes
+- Swagger UI: http://localhost:8010/docs
 
 ## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
@@ -129,7 +180,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Thanks to all contributors
-- Special thanks to the open-source TTS community
+- XTTS Community
+- Flask Team
+- Docker Community
+- Open Source TTS Community
 
 ---
